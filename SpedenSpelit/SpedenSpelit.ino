@@ -21,6 +21,8 @@ void setup()
   initializeTimer();
 }
 
+// test kommenti
+
 void loop()
 {
   // Game state 0: We are in the "main menu"
