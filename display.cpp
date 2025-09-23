@@ -29,7 +29,7 @@ void initializeDisplay(void)
 void writeByte(uint8_t bits,bool last)
 {
   pinMode(latchPin, LOW);   //valmistellaan datan siirto
-  //tähän jotain
+                            //tähän jotain
   pinMode(latchPin, HIGH);  //data siirtyy siirtorekisteristä  
 }
 
@@ -43,3 +43,4 @@ void showResult(byte number)
 {
 
 }
+
