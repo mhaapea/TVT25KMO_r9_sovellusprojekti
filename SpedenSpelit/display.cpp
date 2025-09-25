@@ -6,12 +6,13 @@ int latchPin = 10;    //kytketty RCLK(register clock/latch pin), data siirtyy si
 int enablePin = 9;    //kytketty OE(output enable), toimii kytkimenä outputeille. LOW asemassa rekisterin output pinnit auki, HIGH asemassa kiinni.
 int dataPin = 8;      //kytketty SER(serial input), siirtää datan bitti kerrallaan siirtorekisterille.
 
-byte segDigits[] = {
-  //tähän taulukkoon mitä datapinni lähettää sarjarekisterille kun halutaan näyttää jokin luku
-  //esim.
-  // B00101010 = 8
-  // B01000010 = 9
-  // B10010011 = 10 jne.
+byte segLuku[] = {
+  // tähän taulukkoon mitä datapinni lähettää sarjarekisterille kun halutaan näyttää
+  // jokin tietty luku
+  // esim.
+  // B00101010, // 1
+  // B01000010, // 2
+  // B10010011, // 3 jne., nämä ei ole vielä oikein
 }
 
 void initializeDisplay(void)
