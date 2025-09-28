@@ -35,9 +35,49 @@ void initializeDisplay(void)
   sei();
 }
 
+void writeDisplay(uint8_t hundreds, uint8_t firstNumber, uint8_t secondNumber) {
+  digitalWrite(latchPin, LOW);   //valmistellaan datan siirto
+  
+  byte dot = B10000000;
+  byte tens = segLuku[firstNumber];
+  byte ones = segLuku[secondNumber];
+  
+  // koska käytössä on vain kaksi näyttöä, pitää sytyttää näyttöjen pisteet että saadaan ns. isompia lukuja
+  // näillä if-lauseilla näyttöjen pisteitä voi käyttää binäärilukuina
+  // esim. jos luku on 100, syttyy vain toisen näytön piste.
+  // jos luku on 200, syttyy vain ensimmäisen näytön piste
+  // jos luku on 300, syttyy molemmat pisteet, tällä isoin numero mitä voi näyttää on 399
+  if (hundreds == 1 || hundreds == 3) {
+    // OR operaatio eli |-merkki muuttaa byten ensimmäisen bitin 1:ksi eli sytyttää pisteen
+    ones |= dot;
+  }
+  if (hundreds == 2 || hundreds == 3) {
+    tens |= dot;   // add dot to firstNumber
+  }
+  
+  shiftOut(dataPin, clockPin, LSBFIRST, ones);	//Siirretään ensimmäiset bitit rekisterille
+  shiftOut(dataPin, clockPin, LSBFIRST, tens);  // kun toiset bitit siirretään, edelliset bitit siirtyy toiselle rekisterille
+  digitalWrite(latchPin, HIGH);  //data siirtyy siirtorekisteriltä ulostuloihin
+}
+
+void showNumber(int numberToDisplay) {
+  byte hundreds = numberToDisplay / 100;
+  numberToDisplay -= hundreds * 100;
+  
+  byte tens = numberToDisplay / 10;
+  numberToDisplay -= tens * 10;
+  
+  byte ones = numberToDisplay;
+  
+  writeDisplay(hundreds, tens, ones);
+}
+
 
 void writeByte(uint8_t bits,bool last)
 {
+  // ei varmaan tarvi
+
+
   // bool last on sitä varten jos rekisterit on kytketty toisiinsa
   // jos käytetään pin 13 toisen rekisterin dataPinninä niin sitä ei varmaan tarvi
   digitalWrite(latchPin, LOW);   //valmistellaan datan siirto
@@ -48,11 +88,11 @@ void writeByte(uint8_t bits,bool last)
 
 void writeHighAndLowNumber(uint8_t tens,uint8_t ones)
 {
-
+  // ei varmaan tarvi
 }
 
 void showResult(byte number)
 {
-
+  // ei varmaan tarvi
 }
 

@@ -3,7 +3,7 @@
 #include "leds.h"
 #include "SpedenSpelit.h"
 
-volatile int buttonNumber = -1;           // for buttons interrupt handler
+volatile unsigned char buttonNumber = 5;           // for buttons interrupt handler, 5 is when no button is being pressed
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
 byte gameState; // 0 = before game starts, 1 = game in progress, 2 = after game is over
 
@@ -34,7 +34,7 @@ void loop()
 
     // for now only checking when start button is pressed
     if (buttonNumber == 4) {
-      buttonNumber = -1;
+      buttonNumber = 5;
       startTheGame();
       Serial.println("Generated random leds and started game");
     }
@@ -71,7 +71,7 @@ void loop()
         endTheGame();
       }
 
-      buttonNumber = -1;
+      buttonNumber = 5;
     }
 
     if (newTimerInterrupt == true) {
@@ -79,17 +79,6 @@ void loop()
 
       Serial.print("Lighting led: ");
       Serial.println(ledOrder[totalInterrupts]);
-
-      // check if led has been lit 10 times by checking if totalInterrupts is divisible by 10
-      if (totalInterrupts % 10 == 0) {
-        int multiplier = totalInterrupts / 10;
-        float timerSpeed = 1 + (0.1 * multiplier);
-        OCR1A = (16000000.0 / 1024.0 / timerSpeed) - 1;
-        
-        Serial.println(timerSpeed);
-      }
-
-      totalInterrupts += 1;
 
       if (totalInterrupts >= 499) {
         Serial.println("Reached max interrupts, automatically ending game");
@@ -108,7 +97,7 @@ void loop()
     // game is over, save user score if it's better than any of the top 10 scores 
     // and move to state 0 after start button is pressed
     if (buttonNumber == 4) {
-      buttonNumber = -1;
+      buttonNumber = 5;
       gameState = 0;
     }
   } 
@@ -136,6 +125,18 @@ void initializeTimer(void)
 ISR(TIMER1_COMPA_vect)
 {
   newTimerInterrupt = true;
+
+  // check if led has been lit 10 times by checking if totalInterrupts is divisible by 10
+  if (totalInterrupts % 10 == 0) {
+    int multiplier = totalInterrupts / 10;
+    float timerSpeed = 1 + (0.1 * multiplier);
+    // round float to int before assigning to OCR1A
+    OCR1A = (16000000.0 / 1024.0 / timerSpeed) - 1;
+    
+    Serial.println(timerSpeed);
+  }
+
+  totalInterrupts += 1;
 }
 
 void checkGame(byte pushedButton)
