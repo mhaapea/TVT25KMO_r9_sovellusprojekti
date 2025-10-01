@@ -2,6 +2,7 @@
 #include "buttons.h"
 #include "leds.h"
 #include "SpedenSpelit.h"
+#include <EEPROM.h>
 
 volatile unsigned char buttonNumber = 5;           // for buttons interrupt handler, 5 is when no button is being pressed
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
@@ -16,12 +17,10 @@ void setup()
 {
   Serial.begin(9600);
   initButtonsAndButtonInterrupts();
-  //init leds here
-  //init display here
+  initializeDisplay();
+  initializeLeds();
   initializeTimer();
 }
-
-// test kommenti
 
 void loop()
 {
@@ -42,17 +41,17 @@ void loop()
 
   // Game state 1: Game is in progress
   if (gameState == 1) {
-
-    // check button presses
-    if (buttonNumber >= 0)
-    {
+    
+    if (buttonNumber <= 4) {
       Serial.print("Pressed button: ");
       Serial.println(buttonNumber);
 
       // if any of the buttons were pressed, check if it was correct. if start button was pressed, end the game
-      if (buttonNumber <= 3) {
+      if (buttonNumber < 4) {
+
         if (buttonNumber == ledOrder[score]) {
           score++;
+          showNumber(score);
 
           Serial.println("Correct button, +1 score");
           Serial.print("Score: ");
@@ -62,10 +61,8 @@ void loop()
           Serial.print("correct button/led: ");
           Serial.println(ledOrder[score]);
 
-          // disabled for now because no debounce yet in buttons
-          //endTheGame();
+          endTheGame();
         }
-
       } else {
         Serial.println("Pressed start button, ending game");
         endTheGame();
@@ -79,6 +76,7 @@ void loop()
 
       Serial.print("Lighting led: ");
       Serial.println(ledOrder[totalInterrupts]);
+      setLed(ledOrder[totalInterrupts]);
 
       if (totalInterrupts >= 499) {
         Serial.println("Reached max interrupts, automatically ending game");
@@ -110,7 +108,7 @@ void initializeTimer(void)
   TCCR1A = 0; // B00000000
   TCCR1B = (1 << WGM12); // B00001000 (CTC mode)
   TCCR1B |= (1 << CS12) | (1 << CS10); // B00000100, prescaler is 1024, previously with only CS12 = 256. used when calculating timer speed
-  // result is TCCR1B = B00001100;
+  // result is TCCR1B = B00001101;
 
   TIMSK1 = (1 << OCIE1A);
   // TIMSK1 = B00000010;
@@ -128,20 +126,23 @@ ISR(TIMER1_COMPA_vect)
 
   // check if led has been lit 10 times by checking if totalInterrupts is divisible by 10
   if (totalInterrupts % 10 == 0) {
-    int multiplier = totalInterrupts / 10;
-    float timerSpeed = 1 + (0.1 * multiplier);
-    // round float to int before assigning to OCR1A
-    OCR1A = (16000000.0 / 1024.0 / timerSpeed) - 1;
+    // stop timer interrupts by resetting prescalers
+    TCCR1B = (1 << WGM12);
+
+    // multiplier is totalInterrupts divided by 10
+    float timerSpeed = 1 + (0.1 * (totalInterrupts / 10));
+    int value = round(15625 / timerSpeed);
+
+    OCR1A = value - 1;
+
+    // set counter to 0 and set prescalers to enable timer
+    TCNT1 = 0;
+    TCCR1B |= (1 << CS12) | (1 << CS10); 
     
-    Serial.println(timerSpeed);
+    Serial.println(OCR1A);
   }
 
   totalInterrupts += 1;
-}
-
-void checkGame(byte pushedButton)
-{
-  
 }
 
 void initializeGame()
@@ -161,6 +162,8 @@ void startTheGame()
   for (int i = 0; i < sizeof(ledOrder); i++) {
     ledOrder[i] = random(0,4);
   }
+
+  showNumber(score);
 }
 
 void endTheGame() {
@@ -168,5 +171,6 @@ void endTheGame() {
   gameState = 2;
   Serial.print("Your score: ");
   Serial.println(score);
+  clearAllLeds();
 }
 

@@ -53,11 +53,3 @@ void show2(int rounds) {
   }
   clearAllLeds();
 }
-
-void loop() {
-  byte led = random(0, 4);
-  setLed(led);
-  delay(300);
-  clearAllLeds();
-  delay(200);
-}
