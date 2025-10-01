@@ -16,6 +16,18 @@
 */
 void initializeDisplay(void);
 
+/*
+  writeDisplay writes a number to the displays using hundreds, tens and ones
+  7-segment display's dot segments are used as binary to represents numbers up to 399
+*/
+void writeDisplay(uint8_t hundreds, uint8_t firstNumber, uint8_t secondNumber);
+
+/*
+  showNumber separates hundreds, tens and ones from a number and 
+  calls writeDisplay to show the number on the 7-segment display
+*/
+void showNumber(int numberToDisplay);
+
 
 /*
   WriteByte subroutine writes number 0,1,...,9 to
