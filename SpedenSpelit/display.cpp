@@ -72,27 +72,3 @@ void showNumber(int numberToDisplay) {
   writeDisplay(hundreds, tens, ones);
 }
 
-
-void writeByte(uint8_t bits,bool last)
-{
-  // ei varmaan tarvi
-
-
-  // bool last on sitä varten jos rekisterit on kytketty toisiinsa
-  // jos käytetään pin 13 toisen rekisterin dataPinninä niin sitä ei varmaan tarvi
-  digitalWrite(latchPin, LOW);   //valmistellaan datan siirto
-  shiftOut(dataPin, clockPin, LSBFIRST, bits);	//Siirretään bitit rekisterille
-  digitalWrite(latchPin, HIGH);  //data siirtyy siirtorekisteriltä ulostuloihin
-}
-
-
-void writeHighAndLowNumber(uint8_t tens,uint8_t ones)
-{
-  // ei varmaan tarvi
-}
-
-void showResult(byte number)
-{
-  // ei varmaan tarvi
-}
-

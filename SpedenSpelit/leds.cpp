@@ -3,10 +3,14 @@
 const byte ledPins[4] = {A2, A3, A4, A5};
 
 void initializeLeds() {
+  cli();
+
   for (int i = 0; i < 4; i++) {
     pinMode(ledPins[i], OUTPUT);
     digitalWrite(ledPins[i], LOW);
   }
+
+  sei();
 }
 
 void setLed(byte ledNumber) {

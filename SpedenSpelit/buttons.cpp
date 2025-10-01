@@ -3,7 +3,7 @@
 #include "SpedenSpelit.h"
 
 volatile byte lastState;
-volatile int buttonNumber = -1;   // last valid button press
+volatile unsigned char buttonNumber = 5;   // last valid button press
 volatile unsigned long lastDebounceTime[8]; // one timestamp per pin (up to D7)
 const unsigned long debounceDelay = 50;     // debounce time in ms
 

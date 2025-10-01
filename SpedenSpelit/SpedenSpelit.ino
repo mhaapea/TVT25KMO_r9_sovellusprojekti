@@ -1,6 +1,7 @@
 #include "display.h"
 #include "buttons.h"
 #include "leds.h"
+#include "timer.h"
 #include "SpedenSpelit.h"
 #include <EEPROM.h>
 
@@ -11,7 +12,7 @@ byte gameState; // 0 = before game starts, 1 = game in progress, 2 = after game 
 // score also works as a button press counter
 int score;
 byte ledOrder[500];
-int totalInterrupts;
+volatile int totalInterrupts;
 
 void setup()
 {
@@ -101,50 +102,6 @@ void loop()
   } 
 }
 
-void initializeTimer(void)
-{
-	cli();
-  
-  TCCR1A = 0; // B00000000
-  TCCR1B = (1 << WGM12); // B00001000 (CTC mode)
-  TCCR1B |= (1 << CS12) | (1 << CS10); // B00000100, prescaler is 1024, previously with only CS12 = 256. used when calculating timer speed
-  // result is TCCR1B = B00001101;
-
-  TIMSK1 = (1 << OCIE1A);
-  // TIMSK1 = B00000010;
-
-  // (16 000 000 / 1024 * 1) - 1 = 15624 
-  OCR1A = 15624; // 1Hz, timer resets when it hits this value
-  //Serial.println(OCR1A);
-
-  sei();
-}
-
-ISR(TIMER1_COMPA_vect)
-{
-  newTimerInterrupt = true;
-
-  // check if led has been lit 10 times by checking if totalInterrupts is divisible by 10
-  if (totalInterrupts % 10 == 0) {
-    // stop timer interrupts by resetting prescalers
-    TCCR1B = (1 << WGM12);
-
-    // multiplier is totalInterrupts divided by 10
-    float timerSpeed = 1 + (0.1 * (totalInterrupts / 10));
-    int value = round(15625 / timerSpeed);
-
-    OCR1A = value - 1;
-
-    // set counter to 0 and set prescalers to enable timer
-    TCNT1 = 0;
-    TCCR1B |= (1 << CS12) | (1 << CS10); 
-    
-    Serial.println(OCR1A);
-  }
-
-  totalInterrupts += 1;
-}
-
 void initializeGame()
 {
   gameState = 0;
@@ -156,7 +113,7 @@ void startTheGame()
   gameState = 1;
   totalInterrupts = 0;
   score = 0;
-  OCR1A = 15624; // reset timer speed to 1Hz just in case
+  resetTimerSpeed(); // reset timer speed to 1Hz just in case
 
   // fill array of leds to light up with random numbers from 0 to 3
   for (int i = 0; i < sizeof(ledOrder); i++) {
