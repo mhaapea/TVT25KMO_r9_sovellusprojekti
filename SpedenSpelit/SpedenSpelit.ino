@@ -2,8 +2,8 @@
 #include "buttons.h"
 #include "leds.h"
 #include "timer.h"
+#include "highscores.h"
 #include "SpedenSpelit.h"
-#include <EEPROM.h>
 
 volatile unsigned char buttonNumber = 5;  // for buttons interrupt handler, 5 is when no button is being pressed
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
@@ -14,9 +14,12 @@ int score;
 byte ledOrder[500];
 volatile int totalInterrupts;
 
+volatile int highscores[10];
+
 void setup()
 {
   Serial.begin(9600);
+  initializeGame();
   initButtonsAndButtonInterrupts();
   initializeDisplay();
   initializeLeds();
@@ -112,7 +115,15 @@ void initializeGame()
 {
   cli();
   gameState = 0;
-  // get highscores from memory
+  retrieveHighscores();
+  
+  Serial.println("Saved highscores: ");
+  for (int i = 0; i < 10; i++) {
+    Serial.print(i + 1);
+    Serial.print(". ");
+    Serial.println(highscores[i]);
+  }
+
   sei();
 }
 
@@ -136,7 +147,7 @@ void startTheGame()
 }
 
 void endTheGame() {
-  OCR1A = 15624;
+  resetTimerSpeed();
   gameState = 2;
   Serial.print("Your score: ");
   Serial.println(score);
