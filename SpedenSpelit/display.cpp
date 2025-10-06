@@ -17,7 +17,7 @@ byte segLuku[] = {
   B00011001,	// 7
   B01111111,	// 8
   B01111001 	// 9
-}
+};
 
 void initializeDisplay(void)
 {
@@ -27,7 +27,7 @@ void initializeDisplay(void)
   pinMode(clockPin, OUTPUT);
   pinMode(latchPin, OUTPUT);        // lähtöpinnit OUTPUT moodiin
   pinMode(enablePin, OUTPUT);
-  pinmode(dataPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
   digitalWrite(resetPin, LOW);      // LOW resettaa sarjarekisterin kaikki bitit nolliksi
   digitalWrite(resetPin, HIGH);     // poistaa resetin
   digitalWrite(enablePin, LOW);     // pidetään output pinnit auki

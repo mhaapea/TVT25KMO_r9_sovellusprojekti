@@ -4,7 +4,11 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-extern volatile int buttonNumber;
+extern volatile unsigned char buttonNumber;
+extern volatile bool newTimerInterrupt;
+extern volatile int totalInterrupts;
+extern volatile int highscores[10];
+extern byte gameState;
 
 /*
   initializeGame() subroutine is used to initialize all variables

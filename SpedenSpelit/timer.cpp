@@ -2,8 +2,8 @@
 #include "timer.h"
 #include "SpedenSpelit.h"
 
-volatile bool newTimerInterrupt = false;
-volatile int totalInterrupts;
+//volatile bool newTimerInterrupt = false;
+//volatile int totalInterrupts;
 
 void initializeTimer(void)
 {
@@ -28,23 +28,26 @@ ISR(TIMER1_COMPA_vect)
 {
   newTimerInterrupt = true;
 
-  // check if led has been lit 10 times by checking if totalInterrupts is divisible by 10
-  if (totalInterrupts % 10 == 0) {
-    // stop timer interrupts by resetting prescalers
-    TCCR1B = (1 << WGM12);
+  if (gameState == 1) {
+    // check if led has been lit 10 times by checking if totalInterrupts is divisible by 10
+    if (totalInterrupts % 10 == 0) {
+      // stop timer interrupts by resetting prescalers
+      TCCR1B = (1 << WGM12);
 
-    // multiplier is totalInterrupts divided by 10
-    float timerSpeed = 1 + (0.1 * (totalInterrupts / 10));
-    int value = round(defaultTimerSpeed / timerSpeed);
+      // multiplier is totalInterrupts divided by 10
+      float timerSpeed = 1 + (0.1 * (totalInterrupts / 10));
+      int value = round(defaultTimerSpeed / timerSpeed);
 
-    OCR1A = value - 1;
+      OCR1A = value - 1;
+      Serial.println(OCR1A);
 
-    // set counter to 0 and set prescalers to enable timer
-    TCNT1 = 0;
-    TCCR1B |= (1 << CS12) | (1 << CS10); 
+      // set counter to 0 and set prescalers to enable timer
+      TCNT1 = 0;
+      TCCR1B |= (1 << CS12) | (1 << CS10); 
+    }
+
+    //totalInterrupts += 1;
   }
-
-  totalInterrupts += 1;
 }
 
 void resetTimerSpeed() {

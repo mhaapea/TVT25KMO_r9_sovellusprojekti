@@ -5,7 +5,7 @@
 #include "SpedenSpelit.h"
 #include <EEPROM.h>
 
-volatile unsigned char buttonNumber = 5;           // for buttons interrupt handler, 5 is when no button is being pressed
+volatile unsigned char buttonNumber = 5;  // for buttons interrupt handler, 5 is when no button is being pressed
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
 byte gameState; // 0 = before game starts, 1 = game in progress, 2 = after game is over
 
@@ -30,6 +30,7 @@ void loop()
     // timer interrupt used for scrolling through saved highscores/any led effects...
     if (newTimerInterrupt == true) {
       newTimerInterrupt = false;
+      Serial.println("Press the start button to start the game");
     }
 
     // for now only checking when start button is pressed
@@ -79,10 +80,14 @@ void loop()
       Serial.println(ledOrder[totalInterrupts]);
       setLed(ledOrder[totalInterrupts]);
 
+      Serial.println(ledOrder[score]);
+
       if (totalInterrupts >= 499) {
         Serial.println("Reached max interrupts, automatically ending game");
         endTheGame();
       }
+
+      totalInterrupts++;
     }
   }
 
@@ -90,6 +95,7 @@ void loop()
   if (gameState == 2) {
     if (newTimerInterrupt == true) {
       newTimerInterrupt = false;
+      Serial.println("Press start button to move to main menu");
       // might be used for something later
     }
 
@@ -104,23 +110,29 @@ void loop()
 
 void initializeGame()
 {
+  cli();
   gameState = 0;
   // get highscores from memory
+  sei();
 }
 
 void startTheGame()
 {
+  cli();
   gameState = 1;
   totalInterrupts = 0;
   score = 0;
   resetTimerSpeed(); // reset timer speed to 1Hz just in case
 
+  randomSeed(analogRead(A0));
+
   // fill array of leds to light up with random numbers from 0 to 3
   for (int i = 0; i < sizeof(ledOrder); i++) {
     ledOrder[i] = random(0,4);
   }
-
+  
   showNumber(score);
+  sei();
 }
 
 void endTheGame() {
